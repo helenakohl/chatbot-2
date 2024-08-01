@@ -32,14 +32,9 @@ export function useChat() {
   const [currentChat, setCurrentChat] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [state, setState] = useState<"idle" | "waiting" | "loading">("idle");
-  const [assitantSpeaking, setAssitantSpeaking] = useState(false);
-
 
   // Lets us cancel the stream
   const abortController = useMemo(() => new AbortController(), []);
-
-  const speechQueue = useRef<SpeechSynthesisUtterance[]>([]);
-  const isSpeaking = useRef<boolean>(false);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('chatUserId');
@@ -68,8 +63,7 @@ export function useChat() {
     }
   };
 
-
-  //Cancels the current chat and adds the current chat to the history
+  // Cancels the current chat and adds the current chat to the history
   function cancel() {
     setState("idle");
     abortController.abort();
@@ -90,27 +84,25 @@ export function useChat() {
     setChatHistory([]);
   }
 
-  
+  // Delay function
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
   // Sends a new message to the AI function and streams the response
   const sendMessage = async (
     message: string,
     chatHistory: Array<ChatMessage>,
   ) => {
-    if (assitantSpeaking) {
-      console.log("Cannot send message while assistant is speaking");
-      return;
-    }
     setState("waiting");
-    let chatContent = "";
     const newHistory = [
       ...chatHistory,
       { role: "user", content: message } as const,
     ];
 
-    //Log user's message
+    // Log user's message
     await writeToGoogleSheet(message, 'user');
 
     setChatHistory(newHistory);
+
     const body = JSON.stringify({
       messages: newHistory.slice(-appConfig.historyLength),
     });
@@ -124,6 +116,9 @@ export function useChat() {
     });
 
     setCurrentChat("Typing ...");
+
+    // Add a delay before fetching the response
+    await delay(5000); 
 
     if (!res.ok || !res.body) {
       setState("idle");
@@ -149,14 +144,13 @@ export function useChat() {
       ...curr,
       { role: "assistant", content: fullResponse } as const,
     ]);
-    
+
     // Log assistant's message
     writeToGoogleSheet(fullResponse, 'assistant');
 
-    //add longer response time
     setCurrentChat(null);
     setState("idle"); 
   };
 
-  return { sendMessage, currentChat, chatHistory, cancel, clear, state, assitantSpeaking };
+  return { sendMessage, currentChat, chatHistory, cancel, clear, state };
 }
