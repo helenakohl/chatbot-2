@@ -12,7 +12,7 @@ export const Welcome: React.FC = () => (
     </div>
     <div className="bg-gray-100 border-gray-300 border-2 rounded-lg p-2 mr-20 w-full">
       <p>
-        Hey there! Welcome to BMW. I'm {assistantProfile.name}, your sales assistant. Are you looking for something specific today, or would you like some suggestions? Whether you have questions about models, features, or financing, I've got you covered. How can I assist you?
+      Hey there! 👋 Welcome to BMW. I'm {assistantProfile.name}, your sales assistant. Are you looking for something specific today, or would you like some suggestions? 🚗 Whether you have questions about models, features, or financing, I've got you covered. How can I assist you? 😊
       </p>
     </div>
   </div>
